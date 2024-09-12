@@ -24,9 +24,13 @@ main :: proc() {
 	}
 	defer log.destroy_console_logger(context.logger)
 
-	// Do stuff
+	example()
+}
+
+example :: proc() {
 	// load_obj_from_filepath("./assets/cube/cube-no-mat.obj")
 	mesh, ok := load_obj_from_filepath("./assets/cube/cube.obj")
 	assert(ok)
+	log.info(mesh)
 	defer mesh_free(mesh)
 }

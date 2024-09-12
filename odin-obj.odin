@@ -7,6 +7,7 @@ import "core:strings"
 
 _ :: log
 
+// TODO(devon): Refactor tests to support the new version
 // TODO(devon): Vertex buffers
 // TODO(devon): Reduce triangulation to a generic pattern to allow for more than 4 face elements
 // TODO(devon): Support .mtl files
@@ -187,7 +188,8 @@ extract_f32 :: proc(
 	value: f32,
 	offset: int,
 ) {
-	end_index := new_element_index(line, start_offset)
+	end_index, ei_ok := new_element_index(line, start_offset)
+	if !ei_ok {return 0.0, 0}
 
 	sub := line[start_offset:end_index]
 	if v, ok := strconv.parse_f32(sub); ok {
@@ -212,8 +214,8 @@ extract_face :: proc(mesh: ^Model_Data, line: string) {
 
 	offset := 0
 	for {
-		if offset >= len(line) {break}
-		end_index := new_element_index(line, offset)
+		end_index, ok := new_element_index(line, offset)
+		if !ok {break}
 
 		element: [3]uint
 		element_str := line[offset:end_index]
@@ -258,7 +260,15 @@ extract_face :: proc(mesh: ^Model_Data, line: string) {
 	}
 }
 
-new_element_index :: proc(source: string, offset: int) -> int {
+new_element_index :: proc(
+	source: string,
+	offset: int,
+) -> (
+	value: int,
+	ok: bool,
+) {
+	if offset >= len(source) {return -1, false}
+
 	count := 0
 	for r in source[offset:] {
 		if r == ' ' || r == '\n' || r == '\r' {break}
@@ -266,7 +276,7 @@ new_element_index :: proc(source: string, offset: int) -> int {
 		count += 1
 	}
 
-	return count + offset
+	return count + offset, true
 }
 
 separator_index :: proc(source: string, offset: int) -> int {
