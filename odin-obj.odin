@@ -9,11 +9,13 @@ _ :: log
 
 // TODO(devon): Vertex buffers
 // TODO(devon): Reduce triangulation to a generic pattern to allow for more than 4 face elements
+// TODO(devon): Support .mtl files
 
 /*
     A scuffed .obj importer in odin. Used this to learn about the file
     format, but releasing it just in case it can be of some use to someone.
     Currently only supports models with faces of 3 to 4 elements.
+    Material (.mtl) files are not currently supported
 
     Keywords:
         Vertex data:
@@ -77,6 +79,8 @@ _ :: log
     Resources:
         - https://en.wikipedia.org/wiki/Wavefront_.obj_file
         - https://www.fileformat.info/format/wavefrontobj/egff.htm
+        - https://www.loc.gov/preservation/digital/formats/fdd/fdd000508.shtml
+        - https://paulbourke.net/dataformats/mtl/
         - https://stackoverflow.com/questions/23723993/converting-quadriladerals-in-an-obj-file-into-triangles
         - https://stackoverflow.com/questions/23349080/opengl-index-buffers-difficulties
 */
@@ -134,6 +138,24 @@ load_obj_from_filepath :: proc(
 			extract_face(mesh, v)
 		case "mtllib":
 		case "usemtl":
+		case "newmtl":
+		case "map_Ka":
+		case "map_Kd":
+		case "map_Ks":
+		case "map_Ns":
+		case "map_d":
+		case "disp":
+		case "decl":
+		case "bump":
+		case "d":
+		case "illum":
+		case "Ns":
+		case "Ni":
+		case "Ka":
+		case "Kd":
+		case "Ks":
+		case "Ke":
+
 		case:
 		}
 
