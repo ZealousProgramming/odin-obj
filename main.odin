@@ -29,8 +29,11 @@ main :: proc() {
 
 example :: proc() {
 	// load_obj_from_filepath("./assets/cube/cube-no-mat.obj")
-	mesh, ok := load_obj_from_filepath("./assets/cube/cube.obj")
+	// mesh, ok := load_obj_from_filepath("./assets/cube/cube.obj")
+	model_data, ok := load_obj_from_filepath(
+		"./assets/cube/cube-triangulated.obj",
+	)
 	assert(ok)
-	log.info(mesh)
-	defer mesh_free(mesh)
+	log.info(model_data)
+	defer model_data_free(model_data)
 }

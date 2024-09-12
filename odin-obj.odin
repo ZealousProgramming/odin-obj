@@ -103,7 +103,7 @@ load_obj_from_filepath :: proc(
 	path: string,
 	allocator := context.allocator,
 ) -> (
-	mesh: ^Model_Data,
+	model_data: ^Model_Data,
 	ok: bool,
 ) {
 	raw, rok := os.read_entire_file_from_filename(path, context.temp_allocator)
@@ -115,7 +115,7 @@ load_obj_from_filepath :: proc(
 	defer delete(raw, context.temp_allocator)
 
 	data := string(raw)
-	mesh = mesh_init(allocator)
+	model_data = model_data_init(allocator)
 
 	// Parse
 	for line in strings.split_lines_iterator(&data) {
@@ -129,14 +129,14 @@ load_obj_from_filepath :: proc(
 		case "#":
 		case "o":
 		case "v":
-			extract_vec3(&mesh.vertices_positions, v)
+			extract_vec3(&model_data.vertices_positions, v)
 		case "vn":
-			extract_vec3(&mesh.vertices_normals, v)
+			extract_vec3(&model_data.vertices_normals, v)
 		case "vt":
-			extract_vec2(&mesh.vertices_uvs, v)
+			extract_vec2(&model_data.vertices_uvs, v)
 		case "s":
 		case "f":
-			extract_face(mesh, v)
+			extract_face(model_data, v)
 		case "mtllib":
 		case "usemtl":
 		case "newmtl":
@@ -199,7 +199,7 @@ extract_f32 :: proc(
 	return 0.0, 0
 }
 
-extract_face :: proc(mesh: ^Model_Data, line: string) {
+extract_face :: proc(model_data: ^Model_Data, line: string) {
 	// NOTE(devon): If one of the elements is 0, that means those indices are not being 
 	// used in this model. Reminder that in .obj format, these indices are 1-based.
 	// For example the simplest .obj with 3 geometric vertices, 1 face with 3 face elements consisting on only the position indice
@@ -244,18 +244,18 @@ extract_face :: proc(mesh: ^Model_Data, line: string) {
 		indices := [2][3]uint{{0, 1, 2}, {0, 2, 3}}
 		for i in indices {
 			for j in i {
-				append(&mesh.indices_positions, face_elements[j][0])
-				append(&mesh.indices_uvs, face_elements[j][1])
-				append(&mesh.indices_normals, face_elements[j][2])
+				append(&model_data.indices_positions, face_elements[j][0])
+				append(&model_data.indices_uvs, face_elements[j][1])
+				append(&model_data.indices_normals, face_elements[j][2])
 			}
 		}
 
 	} else {
 		indices := [3]uint{0, 1, 2}
 		for i in indices {
-			append(&mesh.indices_positions, face_elements[i][0])
-			append(&mesh.indices_uvs, face_elements[i][1])
-			append(&mesh.indices_normals, face_elements[i][2])
+			append(&model_data.indices_positions, face_elements[i][0])
+			append(&model_data.indices_uvs, face_elements[i][1])
+			append(&model_data.indices_normals, face_elements[i][2])
 		}
 	}
 }
@@ -290,26 +290,29 @@ separator_index :: proc(source: string, offset: int) -> int {
 	return count + offset
 }
 
-mesh_init :: proc(allocator := context.allocator) -> ^Model_Data {
-	mesh := new(Model_Data, allocator)
-	mesh.vertices_positions = make([dynamic][3]f32, 0, allocator)
-	mesh.vertices_normals = make([dynamic][3]f32, 0, allocator)
-	mesh.vertices_uvs = make([dynamic][2]f32, 0, allocator)
-	mesh.indices_positions = make([dynamic]uint, 0, allocator)
-	mesh.indices_normals = make([dynamic]uint, 0, allocator)
-	mesh.indices_uvs = make([dynamic]uint, 0, allocator)
+model_data_init :: proc(allocator := context.allocator) -> ^Model_Data {
+	model_data := new(Model_Data, allocator)
+	model_data.vertices_positions = make([dynamic][3]f32, 0, allocator)
+	model_data.vertices_normals = make([dynamic][3]f32, 0, allocator)
+	model_data.vertices_uvs = make([dynamic][2]f32, 0, allocator)
+	model_data.indices_positions = make([dynamic]uint, 0, allocator)
+	model_data.indices_normals = make([dynamic]uint, 0, allocator)
+	model_data.indices_uvs = make([dynamic]uint, 0, allocator)
 
-	return mesh
+	return model_data
 }
 
-mesh_free :: proc(mesh: ^Model_Data, allocator := context.allocator) {
-	if mesh == nil {return}
+model_data_free :: proc(
+	model_data: ^Model_Data,
+	allocator := context.allocator,
+) {
+	if model_data == nil {return}
 
-	defer free(mesh, allocator)
-	delete(mesh.vertices_positions)
-	delete(mesh.vertices_normals)
-	delete(mesh.vertices_uvs)
-	delete(mesh.indices_positions)
-	delete(mesh.indices_normals)
-	delete(mesh.indices_uvs)
+	defer free(model_data, allocator)
+	delete(model_data.vertices_positions)
+	delete(model_data.vertices_normals)
+	delete(model_data.vertices_uvs)
+	delete(model_data.indices_positions)
+	delete(model_data.indices_normals)
+	delete(model_data.indices_uvs)
 }
