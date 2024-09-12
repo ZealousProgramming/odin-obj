@@ -7,7 +7,6 @@ import "core:strings"
 
 _ :: log
 
-// TODO(devon): Refactor tests to support the new version
 // TODO(devon): Vertex buffers
 // TODO(devon): Reduce triangulation to a generic pattern to allow for more than 4 face elements
 // TODO(devon): Support .mtl files
